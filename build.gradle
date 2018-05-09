@@ -1,0 +1,46 @@
+buildscript {
+    repositories {
+        maven { url = "https://plugins.gradle.org/m2" }
+    }
+
+    dependencies {
+        classpath "gradle.plugin.net.minecrell:licenser:0.3"
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+        classpath "gradle.plugin.org.spongepowered:spongegradle:0.8.1"
+    }
+}
+
+ext.api = project
+
+apply from: "gradle/tempus.gradle"
+apply plugin: "org.spongepowered.meta"
+
+dependencies {
+    
+}
+
+jar {
+    manifest {
+        attributes("Main-Class": "xyz.ferus.tempus.api.util.InvalidMain")
+    }
+}
+
+task sourceJar(type: Jar) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourceJar
+    archives javadocJar
+}
+
+apply plugin: "com.github.johnrengelman.shadow"
+
+shadowJar {
+    classifier = "shaded"
+}
+
+artifacts {
+    archives shadowJar
+}
