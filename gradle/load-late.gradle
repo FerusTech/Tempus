@@ -1,0 +1,164 @@
+// Caches snapshot builds for 0 seconds (update easily)
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor(0, "seconds")
+}
+
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+}
+
+// Creates a POM file in the build directory
+task makePomXml {
+    doLast {
+        pom {}.writeTo("$buildDir/libs/$project.name-$project.version" + ".xml")
+    }
+}
+
+// License Configuration
+processResources {
+    from "LICENSE.txt"
+}
+
+apply plugin: "net.minecrell.licenser"
+license {
+    ext {
+        name = project.name
+        organization = project.organization
+        url = project.url
+    }
+
+    header = file("HEADER.txt")
+    include "**/*.java"
+    newLine = false
+}
+
+// Token Replacement
+apply plugin: "ninja.miserable.blossom"
+blossom {
+    replaceToken "@version@", project.version
+    replaceToken "@description@", project.description
+    replaceToken "@url@", project.url
+
+    replaceToken "@branch@", commit.getBranch()
+    replaceToken "@hash@", commit.getHash()
+    replaceToken "@shortHash@", commit.getBuild()
+}
+
+// Jar Configuration
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ["-Xlint:all", "-Xlint:-path", "-parameters"]
+    options.deprecation = true
+    options.encoding = "UTF-8"
+}
+
+jar {
+    manifest {
+        attributes(
+                "Build": commit.getBuild(),
+                "Built-By": System.properties["user.name"],
+                "Created-By": "${System.properties["java.version"]} (${System.properties["java.vendor"]} ${System.properties["java.vm.version"]})".toString(),
+                "Build-Date": formatDate("yyyy-MM-dd"),
+                "Build-Time": formatDate("HH:mm:ss.SSSZ"),
+                "Build-Revision": commit.getHash(),
+                "Build-Branch": commit.getBranch(),
+
+                "Specification-Title": project.name,
+                "Specification-Version": project.version,
+                "Specification-Vendor": project.url,
+
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": project.url
+        )
+    }
+}
+
+// Source Jar Configuration
+task sourcesJar(type: Jar) {
+    group 'Build'
+    description 'An archive of the source code'
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+// JavaDocs/JavaDoc Jar Configuration
+javadoc {
+    excludes = ["META-INF/**"]
+
+    options.use = true
+    options.splitIndex = true
+    options.author = true
+    options.version = true
+    options.windowTitle = "$project.name $project.version Java Documentation"
+    options.docTitle = "$project.name $project.version Java Documentation"
+
+    options.encoding = "UTF-8"
+    options.charSet = "UTF-8"
+    options.links(
+            'http://www.slf4j.org/apidocs/',
+            'https://google.github.io/guava/releases/21.0/api/docs/',
+            'https://google.github.io/guice/api-docs/4.1/javadoc/',
+            'https://zml2008.github.io/configurate/configurate-core/apidocs/',
+            'https://zml2008.github.io/configurate/configurate-hocon/apidocs/',
+            'https://docs.oracle.com/javase/8/docs/api/',
+            'https://jd.spongepowered.org/7.0.0/'
+    )
+
+    options.addBooleanOption("javafx", true)
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+task javadocJar(type: Jar) {
+    group 'Build'
+    description 'An archive of the Javadocs'
+    classifier 'javadoc'
+    from javadoc.destinationDir
+}
+
+// Shadow Jar Configuration
+shadowJar {
+    classifier = "shaded"
+}
+
+// Artifact list
+artifacts {
+    archives jar
+    archives sourcesJar
+    archives javadocJar
+    archives shadowJar
+}
+
+// Build task configuration
+build {
+    // Files
+    dependsOn clean
+    dependsOn makePomXml
+    dependsOn licenseFormat
+    makePomXml.mustRunAfter clean
+    licenseFormat.mustRunAfter makePomXml
+
+    // Artifacts
+    dependsOn jar
+    dependsOn javadocJar
+    dependsOn sourcesJar
+    dependsOn shadowJar
+    jar.mustRunAfter licenseFormat
+    javadocJar.mustRunAfter jar
+    sourcesJar.mustRunAfter javadocJar
+    shadowJar.mustRunAfter sourcesJar
+
+    // Docs
+    dependsOn javadoc
+    javadoc.mustRunAfter shadowJar
+}
+
+// Gradle Wrapper task
+task wrapper(type: Wrapper) {
+    gradleVersion = project.gradleVersion
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+}

@@ -1,7 +1,7 @@
 /*
- * This file is part of TempusAPI, licensed under the MIT License (MIT).
+ * This file is part of Tempus, licensed under the MIT License (MIT).
  *
- * Copyright (c) FerusXYZ <https://github.com/FerusXYZ/>
+ * Copyright (c) FerusTech <https://github.com/FerusTech>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,20 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package xyz.ferus.tempus.api.util;
+package xyz.ferus.tempus.service.impl;
 
-import javax.swing.JOptionPane;
-import java.awt.GraphicsEnvironment;
+import xyz.ferus.tempus.service.ZonedPlayer;
 
-public class InvalidMain {
+import javax.annotation.Nonnull;
+import java.time.ZoneId;
+import java.util.UUID;
 
-    private static final String ERROR = "This is a Sponge plugin and isn't meant to be run directly.";
+public class SimpleZonedPlayer implements ZonedPlayer {
 
-    public static void main(String[] args) throws UnsupportedOperationException {
-        if (!GraphicsEnvironment.isHeadless()) {
-            JOptionPane.showMessageDialog(null, ERROR, "WHOOPS!", JOptionPane.ERROR_MESSAGE);
-        } else {
-            throw new UnsupportedOperationException(ERROR);
-        }
+    @Nonnull private final UUID uniqueId;
+    @Nonnull private ZoneId zoneId;
+
+    public SimpleZonedPlayer(@Nonnull final UUID uniqueId) {
+        this(uniqueId, ZoneId.systemDefault());
+    }
+
+    public SimpleZonedPlayer(@Nonnull final UUID uniqueId, @Nonnull final ZoneId zoneId) {
+        this.uniqueId = uniqueId;
+        this.zoneId = zoneId;
+    }
+
+    @Nonnull
+    @Override
+    public UUID getUniqueId() {
+        return this.uniqueId;
+    }
+
+    @Nonnull
+    @Override
+    public ZoneId getZoneId() {
+        return this.zoneId;
+    }
+
+    @Nonnull
+    @Override
+    public ZoneId setZoneId(@Nonnull ZoneId zoneId) {
+        final ZoneId old = this.zoneId;
+        this.zoneId = zoneId;
+        return old;
     }
 }

@@ -1,46 +1,46 @@
 buildscript {
     repositories {
         maven { url = "https://plugins.gradle.org/m2" }
+        maven { url = "http://files.minecraftforge.net/maven" }
     }
 
     dependencies {
-        classpath "gradle.plugin.net.minecrell:licenser:0.3"
         classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
         classpath "gradle.plugin.org.spongepowered:spongegradle:0.8.1"
+        classpath "gradle.plugin.net.minecrell:licenser:0.3"
+        classpath "net.nemerosa:versioning:2.7-beta.1"
+        classpath "gradle.plugin.ninja.miserable:blossom:1.0.1"
+
+        // Located at `gradle/sponge.gradle`
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
     }
 }
 
-ext.api = project
+apply from: file("gradle/load-early.gradle")
 
-apply from: "gradle/tempus.gradle"
-apply plugin: "org.spongepowered.meta"
+version = generateVersion()
+
+apply plugin: "org.spongepowered.plugin"
+sponge.plugin.id = project.name.toLowerCase()
+
+repositories {
+    mavenCentral()
+    maven { url = "https://repo.spongepowered.org/maven" }
+}
 
 dependencies {
-    
+    compileOnly "org.spongepowered:spongeapi:7.1.0-SNAPSHOT"
 }
 
 jar {
     manifest {
-        attributes("Main-Class": "xyz.ferus.tempus.api.util.InvalidMain")
+        attributes(
+                "Main-Class": "xyz.ferus.tempus.InvalidMain"
+        )
     }
 }
 
-task sourceJar(type: Jar) {
-    classifier = "sources"
-    from sourceSets.main.allSource
-}
+// Only uncomment this for TESTING purposes
+apply from: file("gradle/testing-sponge.gradle")
 
-artifacts {
-    archives sourceJar
-    archives javadocJar
-}
-
-apply plugin: "com.github.johnrengelman.shadow"
-
-shadowJar {
-    classifier = "shaded"
-}
-
-artifacts {
-    archives shadowJar
-}
+apply from: file("gradle/load-late.gradle")

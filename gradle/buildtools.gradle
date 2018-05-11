@@ -1,0 +1,51 @@
+import java.text.SimpleDateFormat
+final Date date = new Date()
+
+ext.formatDate = { final String format ->
+    return new SimpleDateFormat(format).format(date)
+}
+
+apply plugin: "net.nemerosa.versioning"
+ext.commit = new Commit(
+        versioning.info.branch,
+        versioning.info.commit,
+        versioning.info.build
+)
+
+String generatedVersion = null
+ext.generateVersion = {
+    if (generatedVersion != null) {
+        return generatedVersion
+    }
+
+    final String branch = commit.getBranch()
+    final String[] split = branch.split("/")
+    split[0] = split[0].toUpperCase()
+
+    generatedVersion = baseVersion + (branch == "master" ? "" : branch == "develop" ? "-SNAPSHOT" : "-" + split.join("-") + "-SNAPSHOT")
+    return generatedVersion
+}
+
+class Commit {
+    private String branch
+    private String hash
+    private String build
+
+    private Commit(final String branch, final String hash, final String build) {
+        this.branch = branch
+        this.hash = hash
+        this.build = build
+    }
+
+    String getBranch() {
+        return this.branch
+    }
+
+    String getHash() {
+        return this.hash
+    }
+
+    String getBuild() {
+        return this.build
+    }
+}
