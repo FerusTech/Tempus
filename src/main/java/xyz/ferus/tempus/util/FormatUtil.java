@@ -15,16 +15,16 @@ public class FormatUtil {
     private static final Map<Integer, DateTimeFormatter> ORDINAL_NOT_TH;
     private static final DateTimeFormatter ORDINAL_TH;
     static {
-        ORDINAL_TH = DateTimeFormatter.ofPattern("EE, MMMM dd'th' H:mma");
+        ORDINAL_TH = DateTimeFormatter.ofPattern("EE, MMMM dd'th' h:mma");
 
-        final DateTimeFormatter st = DateTimeFormatter.ofPattern("EE, MMMM dd'st' uuuu 'at' H:mma");
-        final DateTimeFormatter nd = DateTimeFormatter.ofPattern("EE, MMMM dd'nd' uuuu 'at' H:mma");
-        final DateTimeFormatter rd = DateTimeFormatter.ofPattern("EE, MMMM dd'rd' uuuu 'at' H:mma");
+        final DateTimeFormatter st = DateTimeFormatter.ofPattern("EE, MMMM dd'st' uuuu 'at' h:mma");
+        final DateTimeFormatter nd = DateTimeFormatter.ofPattern("EE, MMMM dd'nd' uuuu 'at' h:mma");
+        final DateTimeFormatter rd = DateTimeFormatter.ofPattern("EE, MMMM dd'rd' uuuu 'at' h:mma");
 
-        FORMATS.put("EE, MMMM dd'th' H:mma", ORDINAL_TH);
-        FORMATS.put("EE, MMMM dd'st' uuuu 'at' H:mma", st);
-        FORMATS.put("EE, MMMM dd'nd' uuuu 'at' H:mma", nd);
-        FORMATS.put("EE, MMMM dd'rd' uuuu 'at' H:mma", rd);
+        FORMATS.put("EE, MMMM dd'th' h:mma", ORDINAL_TH);
+        FORMATS.put("EE, MMMM dd'st' uuuu 'at' h:mma", st);
+        FORMATS.put("EE, MMMM dd'nd' uuuu 'at' h:mma", nd);
+        FORMATS.put("EE, MMMM dd'rd' uuuu 'at' h:mma", rd);
 
         ORDINAL_NOT_TH = ImmutableMap.<Integer, DateTimeFormatter>builder()
                 .put(1, st).put(21, st).put(31, st)
