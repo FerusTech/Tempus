@@ -41,6 +41,6 @@ jar {
 }
 
 // Only uncomment this for TESTING purposes
-apply from: file("gradle/testing-sponge.gradle")
+//apply from: file("gradle/testing-sponge.gradle")
 
 apply from: file("gradle/load-late.gradle")
